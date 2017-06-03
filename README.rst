@@ -10,6 +10,18 @@ perf
    :alt: Build status of perf on Travis CI
    :target: https://travis-ci.org/haypo/perf
 
+xperf is an extension (= derivative work) of perf module.
+
+Credits to original author of perf (https://github.com/haypo/perf).
+
+perf provides facility for "time" benchmarking of python applications.
+
+xperf intends to provide additional facilities to collect and analyze 
+other benchmark data like CPU stats, memory stats - at a system level
+and at a process level.
+
+More details..TBD
+
 The Python ``perf`` module is a toolkit to write, run and analyze benchmarks.
 
 Features:
