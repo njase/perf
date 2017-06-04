@@ -7,7 +7,8 @@ import statistics
 import perf
 from perf._formatter import (format_number, format_value, format_values,
                              format_timedelta)
-from perf._utils import MS_WINDOWS, percentile, median_abs_dev
+from perf._utils import (MS_WINDOWS, percentile, median_abs_dev, 
+                        is_verbose, perf_start_ext_tracing, perf_stop_ext_tracing)
 
 try:
     # Python 3.3 provides a real monotonic clock (PEP 418)
@@ -48,6 +49,7 @@ class WorkerTask:
         self.inner_loops = None
         self.warmups = None
         self.values = None
+        self.extstats = None
 
     def _compute_values(self, values, nvalue,
                         is_warmup=False,
@@ -85,7 +87,7 @@ class WorkerTask:
             else:
                 values.append(value)
 
-            if args.verbose:
+            if args.verbose or is_verbose():
                 text = format_value(unit, value)
                 if is_warmup:
                     text = ('%s (loops: %s, raw: %s)'
@@ -144,7 +146,7 @@ class WorkerTask:
         # FIXME: handle division by zero
         mad_diff = (mad1 - mad2) / float(mad2)
 
-        if self.args.verbose:
+        if self.args.verbose or is_verbose():
             stdev1 = statistics.stdev(sample1)
             stdev2 = statistics.stdev(sample2)
             stdev_diff = (stdev1 - stdev2) / float(stdev2)
@@ -221,7 +223,7 @@ class WorkerTask:
                 sys.exit(1)
             nwarmup += 1
 
-        if self.args.verbose:
+        if self.args.verbose or is_verbose():
             print("Calibration: use %s warmups" % format_number(nwarmup))
             print()
 
@@ -244,7 +246,7 @@ class WorkerTask:
                              is_warmup=True,
                              calibrate_loops=True)
 
-        if args.verbose:
+        if args.verbose or is_verbose():
             print()
             print("Calibration: use %s loops" % format_number(self.loops))
             print()
@@ -258,11 +260,20 @@ class WorkerTask:
         args = self.args
         if args.warmups:
             self._compute_values(self.warmups, args.warmups, is_warmup=True)
-            if args.verbose:
+            if args.verbose or is_verbose():
                 print()
 
+        #After warmup, and just before actual run, trigger external stats collection
+        if args.traceextstats:
+            ext_hdl = perf_start_ext_tracing(args.traceextstats)
+
         self._compute_values(self.values, args.values)
-        if args.verbose:
+
+        if args.traceextstats:
+            print("+ External traces collected")
+            self.extstats = perf_stop_ext_tracing(ext_hdl)
+
+        if args.verbose or is_verbose():
             print()
 
     def compute(self):
@@ -273,6 +284,7 @@ class WorkerTask:
             self.metadata['inner_loops'] = self.inner_loops
         self.warmups = []
         self.values = []
+        self.extstats = None
 
         if args.calibrate_warmups or args.recalibrate_warmups:
             self.calibrate_warmups()
@@ -295,6 +307,7 @@ class WorkerTask:
 
         return perf.Run(self.values,
                         warmups=self.warmups,
+                        extstats=self.extstats,
                         metadata=self.metadata,
                         collect_metadata=False)
 

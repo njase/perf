@@ -12,7 +12,7 @@ from perf._cpu_utils import (format_cpu_list, parse_cpu_list,
                              get_isolated_cpus, set_cpu_affinity)
 from perf._formatter import format_timedelta
 from perf._utils import (MS_WINDOWS, abs_executable,
-                         WritePipe, get_python_names)
+                         WritePipe, get_python_names, is_verbose)
 from perf._worker import WorkerProcessTask
 
 
@@ -218,6 +218,8 @@ class Runner:
                             help='option used with --compare-to to name '
                                  'PYTHON as CHANGED_NAME '
                                  'and REF_PYTHON as REF_NAME in results')
+        parser.add_argument('--traceextstats', dest="traceextstats",type=int,
+                            help='Trace user defined (external to perf) stats during actual run (excluding warmup)')
 
         memory = parser.add_mutually_exclusive_group()
         memory.add_argument('--tracemalloc', action="store_true",
@@ -228,7 +230,7 @@ class Runner:
         self.argparser = parser
 
     def _multiline_output(self):
-        return self.args.verbose or multiline_output(self.args)
+        return is_verbose() or self.args.verbose or multiline_output(self.args)
 
     def _only_in_worker(self, option):
         if not self.args.worker:
@@ -363,7 +365,7 @@ class Runner:
             cpus = parse_cpu_list(cpus)
 
         if set_cpu_affinity(cpus):
-            if self.args.verbose:
+            if self.args.verbose or is_verbose():
                 if isolated:
                     text = ("Pin process to isolated CPUs: %s"
                             % format_cpu_list(cpus))
@@ -499,7 +501,7 @@ class Runner:
                             func_metadata=metadata,
                             globals=globals)
 
-    def _display_result(self, bench, checks=True):
+    def _display_result(self, bench, checks=True): #Bench is actully Benchmark object
         args = self.args
 
         # Display the average +- stdev
@@ -538,7 +540,7 @@ class Runner:
         # Use lazy import to limit imports on 'import perf'
         from perf._master import Master
 
-        if self.args.verbose and self._worker_task > 0:
+        if (is_verbose() or self.args.verbose) and self._worker_task > 0:
             print()
         bench = Master(self).create_bench()
         if not self.args.quiet:
