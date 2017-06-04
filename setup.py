@@ -26,7 +26,7 @@
 #  - git commit -a -m "post-release"
 #  - git push
 
-VERSION = '1.4'
+VERSION = '0.2'
 
 DESCRIPTION = 'Python module to generate and modify perf'
 CLASSIFIERS = [
@@ -55,9 +55,9 @@ def main():
         'license': 'MIT license',
         'description': DESCRIPTION,
         'long_description': long_description,
-        'url': 'https://github.com/haypo/perf',
-        'author': 'Victor Stinner',
-        'author_email': 'victor.stinner@gmail.com',
+        'url': 'https://github.com/njase/xtperf',
+        'author': 'Saurabh Mehta',
+        'author_email': 'e.samehta@gmail.com',
         'classifiers': CLASSIFIERS,
         'packages': ['perf', 'perf.tests'],
         'install_requires': ["six"],

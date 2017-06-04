@@ -86,6 +86,8 @@ def create_parser():
                      help='display statistics (min, max, ...)')
     cmd.add_argument('-d', '--dump', action="store_true",
                      help='display benchmark run results')
+    cmd.add_argument('-x', '--extstats', action="store_true",
+                     help='display externally collected benchmark')
     display_options(cmd)
 
     # hist
@@ -115,6 +117,8 @@ def create_parser():
 
     # stats
     cmd = subparsers.add_parser('stats', help='Compute statistics')
+    cmd.add_argument('-x', '--extstats', action="store_true",
+                     help='Compute statistics of externally collected benchmark')
     display_options(cmd)
 
     # metadata
@@ -183,6 +187,8 @@ def create_parser():
                      help='enable verbose mode')
     cmd.add_argument('--raw', action='store_true',
                      help='display raw values')
+    cmd.add_argument('-x', '--extstats', action="store_true",
+                     help='Display externally collected benchmark values')
     display_options(cmd)
 
     # slowest
@@ -515,11 +521,13 @@ def display_benchmarks(args, show_metadata=False, hist=False, stats=False,
 
 
 def cmd_show(args):
+    display_runs_args = {'extstats': args.extstats}
     display_benchmarks(args,
                        show_metadata=args.metadata,
                        hist=args.hist,
                        stats=args.stats,
                        dump=args.dump,
+                       display_runs_args=display_runs_args,
                        checks=not args.quiet,
                        result=True)
 
@@ -535,7 +543,8 @@ def cmd_check(args):
 def cmd_dump(args):
     display_runs_args = {'quiet': args.quiet,
                          'verbose': args.verbose,
-                         'raw': args.raw}
+                         'raw': args.raw,
+                         'extstats' : args.extstats}
     display_benchmarks(args,
                        dump=True,
                        display_runs_args=display_runs_args,
@@ -549,7 +558,10 @@ def cmd_timeit(args, timeit_runner):
 
 
 def cmd_stats(args):
-    display_benchmarks(args, stats=True, checks=not args.quiet)
+    display_runs_args = {'extstats': args.extstats}
+    display_benchmarks(args, stats=True, 
+                       display_runs_args=display_runs_args,
+                       checks=not args.quiet)
 
 
 def cmd_hist(args):

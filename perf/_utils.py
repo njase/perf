@@ -9,6 +9,8 @@ import sys
 import six
 import statistics
 
+import perf._xtperf_stats as extmod
+
 if sys.version_info < (3, 4):
     try:
         import fcntl
@@ -503,3 +505,39 @@ def percentile(values, p):
         return d0 + d1
     else:
         return values[int(k)]
+
+#Only for debugging when using APIs 
+def is_verbose():
+  return 1
+
+def perf_start_ext_tracing(extstats):
+    #Based on extstats, decide if start only system and/or process based stats
+    # Sampling rate 2 seconds
+    task_hdl = extmod.XPerfStatsTask(2)
+    #Start a new process
+    task_hdl.start()
+    return task_hdl
+
+def perf_stop_ext_tracing(task_hdl):
+    return task_hdl.stop()
+
+def perf_validate_extstats(extstats):
+    return True
+
+#Input: tuple of lists of dictionaries..expected to 
+# return formatted command line output
+def perf_stats_extstats(extstats):
+    statsobj = extmod.XPerfStats()
+    statsobj.parse_formatted_stats(extstats)
+    if statsobj.valid:
+        return statsobj.xperf_stat()
+    else:
+        return "Error in xperf_dump_list()"
+
+def perf_dump_extstats(extstats):
+    statsobj = extmod.XPerfStats()
+    statsobj.parse_formatted_stats(extstats)
+    if statsobj.valid:
+        return statsobj.xperf_dump()
+    else:
+        return "Error in xperf_dump_list()"

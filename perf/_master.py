@@ -6,7 +6,7 @@ import subprocess
 from perf._bench import _load_suite_from_pipe
 from perf._cli import format_run
 from perf._formatter import format_number
-from perf._utils import MS_WINDOWS, create_environ, create_pipe, popen_killer
+from perf._utils import MS_WINDOWS, create_environ, create_pipe, popen_killer, is_verbose
 
 
 # Limit to 5 calibration processes
@@ -50,14 +50,17 @@ class Master(object):
             cmd.extend(('--warmups', str(args.warmups)))
             if calibrate_warmups > 1:
                 cmd.append('--recalibrate-warmups')
-        if args.verbose:
-            cmd.append('-' + 'v' * args.verbose)
+        verb = args.verbose or is_verbose()
+        if verb:
+            cmd.append('-' + 'v' * verb)
         if args.affinity:
             cmd.append('--affinity=%s' % args.affinity)
         if args.tracemalloc:
             cmd.append('--tracemalloc')
         if args.track_memory:
             cmd.append('--track-memory')
+        if args.traceextstats:
+            cmd.append('--traceextstats=%d' % args.traceextstats)
 
         if self.runner._add_cmdline_args:
             self.runner._add_cmdline_args(cmd, args)
@@ -141,7 +144,7 @@ class Master(object):
         return (worker_bench, run)
 
     def display_run(self, bench, run):
-        if self.args.verbose:
+        if self.args.verbose or is_verbose():
             for line in format_run(bench, len(self.bench._runs), run):
                 print(line)
             sys.stdout.flush()
@@ -150,7 +153,7 @@ class Master(object):
             sys.stdout.flush()
 
     def calibration_done(self):
-        if self.args.verbose:
+        if self.args.verbose or is_verbose():
             print("Calibration: %s, %s"
                   % (format_number(self.args.warmups, 'warmup'),
                      format_number(self.args.loops, 'loop')))

@@ -8,6 +8,7 @@ import sys
 from perf._formatter import (format_seconds, format_number,
                              format_timedelta, format_datetime)
 from perf._metadata import format_metadata as _format_metadata
+from perf._utils import (perf_stats_extstats, perf_dump_extstats)
 
 
 def empty_line(lines):
@@ -153,7 +154,7 @@ def format_run(bench, run_index, run, common_metadata=None, raw=False,
     return lines
 
 
-def _format_runs(bench, quiet=False, verbose=False, raw=False, lines=None):
+def _format_runs(bench, quiet=False, verbose=False, raw=False, extstats=False, lines=None):
     runs = bench.get_runs()
     if quiet:
         verbose = -1
@@ -184,6 +185,8 @@ def _format_runs(bench, quiet=False, verbose=False, raw=False, lines=None):
         format_run(bench, run_index, run,
                    common_metadata=common_metadata,
                    verbose=verbose, raw=raw, lines=lines)
+        if extstats:
+            _format_extstats(bench,lines,dump=True)
 
     return lines
 
@@ -191,7 +194,7 @@ def _format_runs(bench, quiet=False, verbose=False, raw=False, lines=None):
 PERCENTILE_NAMES = {0: 'minimum', 25: 'Q1', 50: 'median', 75: 'Q3', 100: 'maximum'}
 
 
-def format_stats(bench, lines):
+def format_stats(bench, lines, extstats=None):
     fmt = bench.format_value
     values = bench.get_values()
 
@@ -323,9 +326,21 @@ def format_stats(bench, lines):
     bounds = bench.format_values((outlier_min, outlier_max))
     lines.append('Number of outlier (out of %s..%s): %s'
                  % (bounds[0], bounds[1], format_number(noutlier)))
+    
+    if extstats:
+        _format_extstats(bench,lines)
 
     return lines
 
+def _format_extstats(bench, lines,dump=False):
+     values = bench.get_extvalues()
+     if dump:
+         fmt_op = perf_dump_extstats(values)
+     else:
+         fmt_op = perf_stats_extstats(values)
+   
+     for line in fmt_op: 
+         lines.append(line)
 
 def format_histogram(benchmarks, bins=20, extend=False, lines=None,
                      checks=False):
@@ -546,7 +561,8 @@ def format_result(bench, prefix=True):
 
 
 def format_benchmark(bench, checks=True, metadata=False,
-                     dump=False, stats=False, hist=False, show_name=False,
+                     dump=False, stats=False,
+                     hist=False, show_name=False,
                      result=True, display_runs_args=None):
     lines = []
 
@@ -563,7 +579,7 @@ def format_benchmark(bench, checks=True, metadata=False,
         format_histogram([(bench, None)], lines=lines)
 
     if stats:
-        format_stats(bench, lines=lines)
+        format_stats(bench, lines=lines, **display_runs_args)
 
     if checks:
         format_checks(bench, lines=lines)

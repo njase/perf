@@ -13,7 +13,7 @@ from perf._metadata import (NUMBER_TYPES, parse_metadata,
                             _common_metadata, get_metadata_info,
                             _exclude_common_metadata)
 from perf._formatter import DEFAULT_UNIT, format_values
-from perf._utils import parse_iso8601, median_abs_dev, percentile
+from perf._utils import parse_iso8601, median_abs_dev, percentile, perf_validate_extstats
 
 
 # JSON format history:
@@ -92,9 +92,9 @@ def _cached_attr(func):
 class Run(object):
     # Run is immutable, so it can be shared/exchanged between two benchmarks
 
-    __slots__ = ('_warmups', '_values', '_metadata')
+    __slots__ = ('_warmups', '_values', '_metadata','_extstats')
 
-    def __init__(self, values, warmups=None,
+    def __init__(self, values, warmups=None, extstats=None,
                  metadata=None, collect_metadata=True):
         if any(not(isinstance(value, NUMBER_TYPES) and value > 0)
                for value in values):
@@ -104,6 +104,15 @@ class Run(object):
             raise ValueError("warmups must be a sequence of (loops, value) "
                              "where loops is a int >= 1 and value "
                              "is a float >= 0.0")
+
+        if extstats:
+            if not perf_validate_extstats(extstats):
+                raise ValueError("Vaidation of extstats has failed - see third party module logs")
+            self._extstats = tuple([extstats])
+            #print("Stored the received extstatus as part of Run object creation as ")
+            #print(self._extstats)
+        else:
+            self._extstats = []
 
         # tuple of (loops: int, value) items
         if warmups:
@@ -210,6 +219,13 @@ class Run(object):
     def values(self):
         return self._values
 
+    @property
+    def extstats(self):
+        if self._extstats:
+            return self._extstats
+        else:
+            return ()
+
     def get_loops(self):
         return self._metadata.get('loops', 1)
 
@@ -253,6 +269,8 @@ class Run(object):
             data['warmups'] = self._warmups
         if self._values:
             data['values'] = self._values
+        if self._extstats:
+            data['extstats'] = self._extstats
 
         metadata = _exclude_common_metadata(self._metadata, common_metadata)
         if metadata:
@@ -278,9 +296,12 @@ class Run(object):
         else:
             values = run_data['samples']
 
+        extstats = run_data.get('extstats', None)
+
         return cls(values,
                    warmups=warmups,
                    metadata=metadata,
+                   extstats=extstats,
                    collect_metadata=False)
 
     def _extract_metadata(self, name):
@@ -386,6 +407,7 @@ class Benchmark(object):
 
     def _clear_runs_cache(self, keep_common_metadata=False):
         self._values = None
+        self._extvalues = None
         self._mean = None
         self._stdev = None
         self._median = None
@@ -490,6 +512,18 @@ class Benchmark(object):
         values = tuple(values)
         self._values = values
         return values
+
+    def get_extvalues(self):
+        if self._extvalues is not None:
+            return self._extvalues
+
+        extvalues = []
+        for run in self._runs:
+            extvalues.extend(run.extstats)
+        extvalues = tuple(extvalues)
+        self._extvalues = extvalues
+        return extvalues
+        
 
     def _get_raw_values(self, warmups=False):
         raw_values = []

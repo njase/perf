@@ -4,6 +4,7 @@ import sys
 
 from perf._cli import display_title, format_result_value
 from perf._utils import is_significant
+from perf._utils import is_verbose
 
 
 def is_significant_benchs(bench1, bench2):
@@ -251,13 +252,15 @@ def compare_suites_table(grouped_by_name, by_speed, args):
 
 def compare_suites_list(all_results, show_name, args):
     not_significant = []
+    verbose = is_verbose() or args.verbose
+
     for index, results in enumerate(all_results):
         significant = any(result.significant for result in results)
         lines = []
         for result in results:
-            lines.extend(result.format(args.verbose))
+            lines.extend(result.format(verbose))
 
-        if not(significant or args.verbose):
+        if not(significant or verbose):
             not_significant.append(results.name)
             continue
 
@@ -362,7 +365,8 @@ def timeit_compare_benchs(name1, bench1, name2, bench2, args):
     data2 = CompareData(name2, bench2)
     compare = CompareResult(data1, data2)
     if not args.quiet:
-        lines = compare.format(verbose=args.verbose)
+        verb = is_verbose() or args.verbose
+        lines = compare.format(verbose=verb)
         for line in lines:
             print(line)
     else:
