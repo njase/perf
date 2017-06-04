@@ -20,6 +20,18 @@ xtperf intends to provide additional facilities to collect and analyze
 other benchmark data like CPU stats, memory stats - at a system level
 and at a process level.
 
+Commands e.g.
+
+python try.py --traceextstats 1 --loops=1 --values=1 -p 2 -o output.json
+
+python -m perf stats -x output.json
+
+python -m perf dump -x output.json
+
+python -m perf show -d -x output.json
+
+python -m perf show -t -x output.json
+
 More details..TBD
 
 The Python ``perf`` module is a toolkit to write, run and analyze benchmarks.
