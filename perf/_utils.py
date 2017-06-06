@@ -513,7 +513,7 @@ def is_verbose():
 def perf_start_ext_tracing(extstats):
     #Based on extstats, decide if start only system and/or process based stats
     # Sampling rate 2 seconds
-    task_hdl = extmod.XPerfStatsTask(2)
+    task_hdl = extmod.XPerfStatsTask(extstats)
     #Start a new process
     task_hdl.start()
     return task_hdl
