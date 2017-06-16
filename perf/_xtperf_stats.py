@@ -354,3 +354,52 @@ class XPerfStats():
         ############
         return lines
 
+    def xperf_get_values(self,sys=False,proc=False):
+        values = {}
+
+        if (not self.valid) or (sys is False and proc is False):
+            print("No external data available to display!!")
+            return lines
+
+        if sys is True:
+            values["ncores"] = self._ncores
+            values["syscpuload"] = []
+            for i in range(self._ncores-1):
+                cpu_arr = self.cpu_load_np_arr[:,i]
+                values["syscpuload"].append(cpu_arr.tolist());
+
+            values["syscpuutil"] = [] #user,sys,idle
+            cpu_arr = self.cpu_user_util_np_arr
+            values["syscpuutil"].append(cpu_arr.tolist())
+            cpu_arr = self.cpu_sys_util_np_arr 
+            values["syscpuutil"].append(cpu_arr.tolist())
+            cpu_arr = self.cpu_idle_util_np_arr
+            values["syscpuutil"].append(cpu_arr.tolist())
+
+            values["sysvm"] = [] #used, available  
+            vm_arr = self.sys_used_vm_np_arr
+            values["sysvm"].append(vm_arr.tolist())
+            vm_arr = self.sys_free_vm_np_arr
+            values["sysvm"].append(vm_arr.tolist())
+  
+        if proc is True:
+            values["procpuload"] = []
+            cpu_arr = self.cpu_proc_load_np_arr
+            values["procpuload"].append(cpu_arr.tolist())
+
+            values["proccpuutil"] = []
+            cpu_arr = self.cpu_proc_user_util_np_arr
+            values["proccpuutil"].append(cpu_arr.tolist())
+            cpu_arr = self.cpu_proc_sys_util_np_arr
+            values["proccpuutil"].append(cpu_arr.tolist())
+
+            vm_arr = self.proc_used_vm_np_arr
+            values["procvm"] = vm_arr.tolist()
+
+            values["procctx"] = [] #Voluntary, involuntary
+            cpu_arr = self.proc_vol_ctx_np_arr
+            values["procctx"].append(cpu_arr.tolist())
+            cpu_arr = self.proc_invol_ctx_np_arr
+            values["procctx"].append(cpu_arr.tolist())
+
+            return values

@@ -15,6 +15,7 @@ from perf._formatter import format_timedelta, format_seconds, format_datetime
 from perf._cpu_utils import parse_cpu_list
 from perf._timeit_cli import TimeitRunner
 from perf._utils import parse_run_list
+from perf._xtperf_utils import plot_benchmark, plot_benchmark_comparison
 
 
 def add_cmdline_args(cmd, args):
@@ -752,9 +753,19 @@ def cmd_plot(args):
         print("ERROR: maximum two benchmark files can be compared")
         sys.exit(1)
 
-    print("See the plot :")
-    #compare_suites(data, args)
-
+    i = 1
+    for item in data:
+        bench = item.benchmark
+        if data.get_nsuite() == 1:
+            plot_benchmark(bench,args.s,args.n)
+            break
+        else:
+            if i == 1:
+                bench1 = bench
+                i = 2
+            else:
+                plot_benchmark_comparison(bench1,bench2,args.s,args.n)
+            
 def main():
     parser, timeit_runner, command_runner = create_parser()
     args = parser.parse_args()
