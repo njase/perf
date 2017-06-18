@@ -764,6 +764,7 @@ def cmd_plot(args):
                 bench1 = bench
                 i = 2
             else:
+                bench2 = bench
                 plot_benchmark_comparison(bench1,bench2,args.s,args.n)
             
 def main():

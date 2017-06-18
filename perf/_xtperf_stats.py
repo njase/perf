@@ -10,6 +10,7 @@ def collect_stats(ppid,childq,tts):
     while(1):
         stats = collector.read_raw_stats(p)
         childq.put(stats)
+        print("Sleeping for " + str(tts) + "seconds")
         time.sleep(tts)
 
 
@@ -359,19 +360,19 @@ class XPerfStats():
 
         if (not self.valid) or (sys is False and proc is False):
             print("No external data available to display!!")
-            return lines
+            return values
 
         if sys is True:
             values["ncores"] = self._ncores
             values["syscpuload"] = []
-            for i in range(self._ncores-1):
+            for i in range(self._ncores):
                 cpu_arr = self.cpu_load_np_arr[:,i]
                 values["syscpuload"].append(cpu_arr.tolist());
 
-            values["syscpuutil"] = [] #user,sys,idle
-            cpu_arr = self.cpu_user_util_np_arr
-            values["syscpuutil"].append(cpu_arr.tolist())
+            values["syscpuutil"] = [] #sys,user,idle
             cpu_arr = self.cpu_sys_util_np_arr 
+            values["syscpuutil"].append(cpu_arr.tolist())
+            cpu_arr = self.cpu_user_util_np_arr
             values["syscpuutil"].append(cpu_arr.tolist())
             cpu_arr = self.cpu_idle_util_np_arr
             values["syscpuutil"].append(cpu_arr.tolist())
@@ -388,9 +389,9 @@ class XPerfStats():
             values["procpuload"].append(cpu_arr.tolist())
 
             values["proccpuutil"] = []
-            cpu_arr = self.cpu_proc_user_util_np_arr
-            values["proccpuutil"].append(cpu_arr.tolist())
             cpu_arr = self.cpu_proc_sys_util_np_arr
+            values["proccpuutil"].append(cpu_arr.tolist())
+            cpu_arr = self.cpu_proc_user_util_np_arr
             values["proccpuutil"].append(cpu_arr.tolist())
 
             vm_arr = self.proc_used_vm_np_arr
@@ -402,4 +403,5 @@ class XPerfStats():
             cpu_arr = self.proc_invol_ctx_np_arr
             values["procctx"].append(cpu_arr.tolist())
 
-            return values
+           
+        return values
