@@ -541,3 +541,11 @@ def perf_dump_extstats(extstats):
         return statsobj.xperf_dump()
     else:
         return "Error in xperf_dump_list()"
+
+def perf_get_extstats(extstats,sys,proc):
+    statsobj = extmod.XPerfStats()
+    statsobj.parse_formatted_stats(extstats)
+    if statsobj.valid:
+        return statsobj.xperf_get_values(sys,proc)
+    else:
+        return "Error in xperf_dump_list()"

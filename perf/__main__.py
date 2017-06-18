@@ -15,6 +15,7 @@ from perf._formatter import format_timedelta, format_seconds, format_datetime
 from perf._cpu_utils import parse_cpu_list
 from perf._timeit_cli import TimeitRunner
 from perf._utils import parse_run_list
+from perf._xtperf_utils import plot_benchmark, plot_benchmark_comparison
 
 
 def add_cmdline_args(cmd, args):
@@ -204,6 +205,14 @@ def create_parser():
                                 help='Benchmark a command')
     command_runner = CommandRunner(cmd)
 
+    # plot
+    cmd = subparsers.add_parser('plot', help='Display graphical results')
+    cmd.add_argument('-s', action="store_true",
+                     help='Display system wide stats')
+    cmd.add_argument('-n', action="store_true",
+                     help='Display benchmark specific stats')
+    input_filenames(cmd)
+  
     return parser, timeit_runner, command_runner
 
 
@@ -736,7 +745,28 @@ def cmd_bench_command(runner, args):
     command = [args.program] + args.program_args
     runner.bench_command(name, command)
 
+def cmd_plot(args):
+    #from perf._compare import compare_suites
 
+    data = load_benchmarks(args)
+    if data.get_nsuite() > 2:
+        print("ERROR: maximum two benchmark files can be compared")
+        sys.exit(1)
+
+    i = 1
+    for item in data:
+        bench = item.benchmark
+        if data.get_nsuite() == 1:
+            plot_benchmark(bench,args.s,args.n)
+            break
+        else:
+            if i == 1:
+                bench1 = bench
+                i = 2
+            else:
+                bench2 = bench
+                plot_benchmark_comparison(bench1,bench2,args.s,args.n)
+            
 def main():
     parser, timeit_runner, command_runner = create_parser()
     args = parser.parse_args()
@@ -756,6 +786,7 @@ def main():
         'slowest': functools.partial(cmd_slowest, args),
         'system': functools.partial(cmd_system, args),
         'command': functools.partial(cmd_bench_command, command_runner, args),
+        'plot': functools.partial(cmd_plot,args),
     }
 
     with catch_broken_pipe_error():

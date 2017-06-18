@@ -631,3 +631,4 @@ def catch_broken_pipe_error(file=None):
                 file.close()
             except IOError:
                 pass
+
