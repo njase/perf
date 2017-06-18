@@ -10,7 +10,6 @@ def collect_stats(ppid,childq,tts):
     while(1):
         stats = collector.read_raw_stats(p)
         childq.put(stats)
-        print("Sleeping for " + str(tts) + "seconds")
         time.sleep(tts)
 
 

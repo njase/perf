@@ -20,7 +20,6 @@ def line_plot(key,labels,values,splot):
     splot.legend(loc=1)        
 
 def stack_plot(key,labels,values,splot):
-    #colors = ['red','blue','green']
     colors = ['#CC6666','#1DACD6','#6E5160']
     data = values[key]
     if not isinstance(data[0],list):
@@ -33,11 +32,13 @@ def stack_plot(key,labels,values,splot):
         if first_item:
             first_item = False
             x = np.arange(len(item)) + 1
+            splot.plot(x,item,'ko-')
             splot.fill_between(x,0,item,facecolor=colors[i%3],interpolate=True,label=labels[i])
             old_sum = item
         else:
             x = np.arange(len(item)) + 1
             new_sum = [round(a+b,2) for a,b in zip(item,old_sum)]       
+            splot.plot(x,new_sum,'ko-')
             splot.fill_between(x,old_sum,new_sum,facecolor=colors[i%3],interpolate=True,label=labels[i])
             old_sum = new_sum
         splot.legend(loc=1)        
