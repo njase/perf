@@ -7,15 +7,17 @@ def get_timestamp():
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
 def line_plot(key,labels,values,splot):
-    colors = ['ko-','ro-','bo-','go-']
     data = values[key]
     if isinstance(data[0],list):
         for i,item in enumerate(data):        
             x = np.arange(len(item)) + 1
-            splot.plot(x,item,colors[i],label=labels[i])
+            #@TODO: Hack for max 4 CPU plots to be displayes
+            #To be fixed when req frozen
+            if i < 4:
+                splot.plot(x,item,'o-',label=labels[i])
     else:
         x = np.arange(len(data)) + 1
-        splot.plot(x,data,colors[0])
+        splot.plot(x,data,'ko-')
         splot.fill_between(x,0,data,facecolor='#CC6666',interpolate=True,label=labels)
     splot.legend(loc=1)        
 
@@ -50,7 +52,7 @@ def plot_runtime(key,values,splot):
     
 def plot_cpu_load(key,values,splot):
     if key == "syscpuload":
-        labels = ["CPU0","CPU1","CPU2","CPU3","CPU4","CPU5","CPU6","CPU7"]
+        labels = ["CPU0","CPU1","CPU2","CPU3"]
         splot.set_title("Sys CPU load",position=(0.5,0.8),fontweight='bold')
     else:
         labels = ["CPU"]

@@ -24,9 +24,6 @@ class XPerfStatsTask:
 
     def start(self):
         self._p.start()
-        ##Temporarily added a sleep to allow atleast one data collection
-        #print("Remove this temp sleep")
-        #time.sleep(4)
 
     def stop(self):
         self._p.terminate()
@@ -42,10 +39,14 @@ class XPerfStatsTask:
 class XPerfStats():
     def __init__(self,extstats=None):
         self.valid = False
+        self._ncores = psutil.cpu_count()
 
     #Utility function to collect stats
     def read_raw_stats(self,phdl):
-        sys_cpu_per = psutil.cpu_percent(interval=1,percpu=True)
+        if self._ncores > 4:
+            sys_cpu_per = [psutil.cpu_percent(interval=1,percpu=False)]
+        else:
+            sys_cpu_per = psutil.cpu_percent(interval=1,percpu=True)
  
         cput = psutil.cpu_times()
         total_time = sum(cput)
@@ -119,7 +120,6 @@ class XPerfStats():
             raw_stats.append(data[0][0])
 
         ###############
-        self._ncores = len(raw_stats[0]["Sys_CPU%"][0])
 
         first = 12*[True]
         for data in raw_stats:
@@ -362,9 +362,11 @@ class XPerfStats():
             return values
 
         if sys is True:
-            values["ncores"] = self._ncores
+            #TODO: There should be better error handling in places like here
+            #We hope that we are not so unlucky to have no CPU load data
+            data_cnt = len(self.cpu_load_np_arr[0])
             values["syscpuload"] = []
-            for i in range(self._ncores):
+            for i in range(data_cnt):
                 cpu_arr = self.cpu_load_np_arr[:,i]
                 values["syscpuload"].append(cpu_arr.tolist());
 
