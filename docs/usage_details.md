@@ -1,5 +1,5 @@
 ### Usage details
-Let us assume that there is a MyApp application which you want to benchmark in some particular scenario.
+Let us assume that there is an application called MyApp which you want to benchmark in some particular scenario.
 
 A typical use case for such a benchmarking would be:
 
@@ -29,8 +29,11 @@ A typical use case for such a benchmarking would be:
    ```python
       $> python ibench.py --traceextstats 1 --loops=1 --values=1 -p 5 -o output.json
    ```
-   Change -p <x> to the number of times  benchmarking should be performed, and -o <x>  as desired file name for output. The rest are recommended as such. See xtperf help for details.
-
+   Change -p <x> to the number of times  benchmarking should be performed, and -o <x>  as desired file name for output. The rest are recommended as such. For more details, type:
+   ```python
+      $> python -m perf help
+   ```
+   
 1. **Analyze output or save for offline analysis**
    1. Graphical analysis of a single output with both system(-s) and process(-n) stats:
    ```python
@@ -46,7 +49,7 @@ A typical use case for such a benchmarking would be:
       $> python -m perf dump -d <mybenchmark.json>
    ```
 
-#### Output
+### Output
 The xtperf results can be stored in an output file in json format.
 
 The results can be offline analyzed on command line using steps mentioned in previous section. These provide:
@@ -62,12 +65,12 @@ These results show:
 * System wide benchmark on the left
 * Process wide benchmark on the right
 
-[System and Process benchmark](images/xtplot_combined_bm.png)
+![System and Process benchmark](images/xtplot_combined_bm.png)
 
 Other visualizations are possible, e.g. comparative plots across two benchmarks as shown below:
-[System wide comparison](xtplot_comp_s.png)
+![System wide comparison](images/xtplot_comp_s.png)
 
-[Process wide comparison](xtplot_comp_n.png)
+![Process wide comparison](images/xtplot_comp_n.png)
 
 
 ### Remarks and recommendations

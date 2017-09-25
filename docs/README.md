@@ -1,6 +1,6 @@
 # xtperf
 
-*Credits: xtperf is a derivative work of perf module (https://github.com/haypo/perf)*
+*Credits: xtperf is a derivative work of [perf](https://github.com/haypo/perf) module*
 
 #### What is xtperf
 xtperf is a generic tool which provides support to collect and analyze several types of real-time benchmarking information for python applications. 
@@ -8,7 +8,8 @@ These include :
 * time benchmarking
 * CPU throughput
 * CPU utilization
-* VM utilization. 
+* VM utilization
+
 These are collected both for the complete system as well as for the application process. 
 The data can be analyzed and compared offline by xtperf commands.
 
@@ -28,7 +29,7 @@ The benchmark specifies the units of that metric, and whether less is better or 
 #### Setup and Usage
 For usage details, follow [this](usage_details.md) link.
 
-Note that xtperf is based on [perf](https://github.com/haypo/perf) toolkit. Therefore, all the commands which are provided by [perf](https://github.com/haypo/perf) are supported by default!
+Note that xtperf is based on [perf](https://github.com/haypo/perf) toolkit. Therefore, all the commands which are provided by perf are supported by default!
 
 #### How it works
 Explanation is TBD. For now, see the source code or ask me for any questions.
